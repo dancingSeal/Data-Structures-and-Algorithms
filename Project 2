@@ -1,0 +1,570 @@
+//============================================================================
+// Name        : CourseTree.cpp
+// Author      : Stephanie Douglas
+// Description : Hello World in C++, Ansi-style
+//============================================================================
+
+#include <iostream>
+#include <time.h>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+
+#include "CSVparser.hpp"
+
+using namespace std;
+
+//============================================================================
+// Global definitions visible to all methods and classes
+//============================================================================
+
+// forward declarations
+double strToDouble(string str, char ch);
+
+// define a structure to hold course information
+struct Course {
+    string courseId; // unique identifier
+    string title;
+    vector<string> prereq;
+};
+
+// Internal structure for tree node
+struct Node {
+    Course course;
+    Node* left;
+    Node* right;
+
+    // default constructor
+    Node() {
+        left = nullptr;
+        right = nullptr;
+    }
+
+    // initialize with a course
+    Node(Course aCourse) : Node() {
+        this->course = aCourse;
+    }
+};
+
+//============================================================================
+// Tree class definition
+//============================================================================
+
+/**
+ * Define a class containing data members and methods to
+ * implement a tree
+ */
+class CourseTree {
+
+private:
+    Node* root;
+
+    void addNode(Node* node, Course course);
+    void inOrder(Node* node);
+    Node* removeNode(Node* node, string courseId);
+
+
+    void PostOrder();
+    void PreOrder();
+
+    void postOrder(Node* node);
+    void preOrder(Node* node);
+
+
+
+public:
+    CourseTree();
+    virtual ~CourseTree();
+    void InOrder();
+    void Insert(Course course);
+    void Remove(string courseId);
+    Course Search(string courseId);
+
+    void DeleteTreeNodes(Node* root);
+};
+
+/**
+ * Default constructor
+ */
+CourseTree::CourseTree() {
+    // FixMe (1): initialize housekeeping variables
+    //root is equal to nullptr
+    this->root = nullptr;
+
+}
+
+
+/*
+Delete all tree nodes recursively
+*/
+void CourseTree::DeleteTreeNodes(Node* root) {
+    // recurse from root deleting every node
+    if (root) {
+        DeleteTreeNodes(root->left);
+        DeleteTreeNodes(root->right);
+        delete root;
+    }
+}
+
+
+/**
+ * Destructor
+ */
+CourseTree::~CourseTree() {
+    //call function to recurse from root deleting every node
+    DeleteTreeNodes(root);
+}
+
+/**
+ * Traverse the tree in order
+ */
+void CourseTree::InOrder() {
+    // FixMe (2): In order root
+    // call inOrder fuction and pass root 
+    inOrder(root);
+}
+
+/**
+ * Traverse the tree in post-order
+ */
+void CourseTree::PostOrder() {
+    // FixMe (3): Post order root
+    // postOrder root
+    postOrder(root);
+
+}
+
+/**
+ * Traverse the tree in pre-order
+ */
+void CourseTree::PreOrder() {
+    // FixMe (4): Pre order root
+    // preOrder root
+    preOrder(root);
+}
+
+/**
+ * Insert a course
+ */
+void CourseTree::Insert(Course course) {
+    // FIXME (5) Implement inserting a course into the tree
+    // if root equal to null ptr
+    if (root == nullptr) {
+        // root is equal to new node course
+        root = new Node(course);
+    }
+    else {
+        // add Node root and course
+        addNode(root, course);
+    }
+}
+
+/**
+ * Remove a course
+ */
+void CourseTree::Remove(string courseId) {
+    // FIXME (6) Implement removing a course from the tree
+    // remove node root courseID
+
+    Node* currNode = root;
+    Node* parentNode = NULL;
+
+    //while tree is not empty
+    while (currNode != NULL) {
+
+        //if current node courseid equals remove courseid
+        if (currNode->course.courseId == courseId) {
+            //if current node has no children
+            if (currNode->left == NULL && currNode->right == NULL) {
+                // if root has no children
+                if (parentNode == NULL) {
+                    //set root to null pointer (empty tree)
+                    root = nullptr;
+                    // else if current node is a left child
+                }
+                else if (parentNode->left == currNode) {
+                    parentNode->left = NULL;
+                    // else current node is a right child 
+                }
+                else {
+                    parentNode->right = NULL;
+                }
+                // else if current node only has left child
+            }
+            else if (currNode->right == NULL) {
+                // if root only has left child
+                if (parentNode == NULL) {
+                    //set root to left child
+                    root = currNode->left;
+                    // else if current node is a left child
+                }
+                else if (parentNode->left == currNode) {
+                    //set parent left node to current node's left node 
+                    parentNode->left = currNode->left;
+                    //else if current node is a right child
+                }
+                else {
+                    //set parent right node to current node's left node 
+                    parentNode->right = currNode->left;
+                }
+                // else if current node only has right child 
+            }
+            else if (currNode->left == NULL) {
+                // if root only has right child
+                if (parentNode == NULL) {
+                    //set root to right child
+                    root = currNode->right;
+                    //else if current node is a left child
+                }
+                else if (parentNode->left == currNode) {
+                    //set parent left node to current node's right node
+                    parentNode->left = currNode->right;
+                    // else current node is a right child
+                }
+                else {
+                    //set parent right node to current node's right node
+                    parentNode->right = currNode->right;
+                }
+                // current node has 2 children
+            }
+            else {
+                //Find successor
+                //initiate successor node to right child
+                Node* succNode = currNode->right;
+
+                //while successor node's left child is not null
+                while (succNode->left != NULL) {
+                    //set successor node to left child
+                    succNode = succNode->left;
+                }
+                //initialize last successor node to node function with successor course
+                Node lastSuccNode = Node(succNode->course);
+                //recursively remove sucessor node
+                Remove(succNode->course.courseId);
+                //set current node to the last successor node
+                currNode->course = lastSuccNode.course;
+            }
+            cout << "node removed" << endl;
+            return;
+            // current node courseid is less than remove courseid
+        }
+        else if (currNode->course.courseId < courseId) {
+            //set parent node to current node
+            parentNode = currNode;
+            //set current node to right child
+            currNode = currNode->right;
+            // current node courseid is greater than remove courseid 
+        }
+        else {
+            //set parent node to current node
+            parentNode = currNode;
+            //set current node to left child
+            currNode = currNode->left;
+        }
+    }
+    cout << "course id does not exist" << endl;
+    return;
+}
+
+/**
+ * Search for a course
+ */
+Course CourseTree::Search(string courseId) {
+    // FIXME (7) Implement searching the tree for a course
+    
+    // transform courseId to uppercase
+    transform(courseId.begin(), courseId.end(), courseId.begin(), ::toupper);
+
+    // set current node equal to root
+    Node* currNode = root;
+
+    // keep looping downwards until bottom reached or matching courseId found
+    while (currNode != nullptr) {
+        // if match found, return current course
+        if (currNode->course.courseId == courseId) {
+            return currNode->course;
+        }
+        // if course is smaller than current node then traverse left
+        if (courseId < currNode->course.courseId) {
+            currNode = currNode->left;
+        }
+        else {
+            // else larger so traverse right
+            currNode = currNode->right;
+        }
+    }
+    return {};
+}
+
+/**
+ * Add a course to some node (recursive)
+ *
+ * @param node Current node in tree
+ * @param course Course to be added
+ */
+void CourseTree::addNode(Node* node, Course course) {
+    // FIXME (8) Implement inserting a course into the tree
+    // if current node is larger than course then add to left
+    if (node->course.courseId > course.courseId) {
+        // if no left node
+        if (node->left == NULL) {
+            // this node becomes left
+            node->left = new Node(course);
+            // else recurse down the left node
+        } else {
+            addNode(node->left, course);
+        }
+    // else current node is smaller than course then add to right
+    } else {
+        // if no right node
+        if (node->right == NULL) {
+            // this node becomes right
+            node->right = new Node(course);
+            //else recurse down the left node
+        }
+        else {
+            addNode(node->right, course);
+        }
+    }
+}
+void CourseTree::inOrder(Node* node) {
+    // FixMe (9): Pre order root
+    if (node == nullptr) {
+        return;
+    }
+    else {
+        //if node is not equal to null ptr
+        //InOrder left
+        inOrder(node->left);
+        //output courseID, title
+        cout << node->course.courseId << ": " << node->course.title << " ";
+        
+        /* display prereqs
+        if (!node->course.prereq.empty()) {
+            for (int i = 0; i < node->course.prereq.size(); i++) {
+                cout << " | " << node->course.prereq.at(i);
+            }
+        }
+        */
+        cout << endl;
+
+        //InOder right
+        inOrder(node->right);
+
+    }
+}
+void CourseTree::postOrder(Node* node) {
+    // FixMe (10): Pre order root
+    if (node == nullptr) {
+        return;
+    }
+    else {
+        //if node is not equal to null ptr
+        //postOrder left
+        postOrder(node->left);
+        //postOrder right
+        postOrder(node->right);
+        //output courseID, title, amount, fund
+        cout << node->course.courseId << ": " << node->course.title << endl;
+    }
+
+}
+
+void CourseTree::preOrder(Node* node) {
+    // FixMe (11): Pre order root
+    if (node == nullptr) {
+        return;
+    }
+    else {
+        //if node is not equal to null ptr
+        //output courseID, title, amount, fund
+        cout << node->course.courseId << ": " << node->course.title << endl;
+
+        //postOrder left
+        postOrder(node->left);
+        //postOrder right  
+        postOrder(node->right);
+    }
+}
+
+//============================================================================
+// Static methods used for testing
+//============================================================================
+
+/**
+ * Display the course information to the console (std::out)
+ *
+ * @param course struct containing the course info
+ */
+void displayCourse(Course course) {
+    cout << course.courseId << ": " << course.title << endl;
+
+    if (!course.prereq.empty()) {
+        cout << "Prerequisites: ";
+        for (int i = 0; i < course.prereq.size(); i++) {
+            cout << course.prereq.at(i) << " ";
+        }
+    }
+    cout << endl;
+
+    return;
+}
+
+/**
+ * Load a CSV file containing courses into a container
+ *
+ * @param csvPath the path to the CSV file to load
+ * @return a container holding all the courses read
+ */
+void loadCourses(string csvPath, CourseTree* bst) {
+    cout << "Loading CSV file " << csvPath << endl;
+
+
+    string line;
+    string substr;
+    vector <string> strVec; // vector to hold substrings of line
+
+    /* If the file opens properly, collect a line.
+    * Create a new string stream, and use getline to
+    * parse at each comma on line.
+    * Add each substring to end of token vector.
+    */
+    ifstream file(csvPath);
+    if (file.is_open()) {
+        while (file.good()) {
+            getline(file, line);
+            // creates string stream from line string
+            stringstream ss(line);
+            Course course;
+
+            // if not at end of file
+            if (!file.eof()) {
+                // while there are sections to parse in line
+                while (getline(ss, substr, ',')) { 
+                    // add substr to vector
+                    strVec.push_back(substr);
+                }
+            // at end of file
+            } else {
+                return;
+            }
+           
+            course.courseId = strVec[0];
+            course.title = strVec[1];
+            
+            //handle optional prerequisites
+            if (strVec.size() > 2) {
+                for (int i = 2; i < strVec.size(); i++) {
+                    course.prereq.push_back(strVec[i]);
+                }
+            }
+
+            // Inserts course into tree
+            bst->Insert(course);
+            // Clears strVec for next line
+            strVec.clear();
+        }
+        file.close();
+    } else {
+        cout << "File not found" << endl;
+    }
+}
+
+/**
+ * Simple C function to convert a string to a double
+ * after stripping out unwanted char
+ *
+ * credit: http://stackoverflow.com/a/24875936
+ *
+ * @param ch The character to strip out
+ */
+double strToDouble(string str, char ch) {
+    str.erase(remove(str.begin(), str.end(), ch), str.end());
+    return atof(str.c_str());
+}
+
+/**
+ * The one and only main() method
+ */
+int main(int argc, char* argv[]) {
+
+    // process command line arguments
+    string csvPath, courseKey;
+    switch (argc) {
+    case 2:
+        csvPath = argv[1];
+        courseKey = "CSCI100";
+        break;
+    case 3:
+        csvPath = argv[1];
+        courseKey = argv[2];
+        break;
+    default:
+        csvPath = "ABCU_Advising_Program_Input.csv";
+        courseKey = "CSCI100";
+    }
+
+    // Define a timer variable
+    clock_t ticks;
+
+    // Define a binary search tree to hold all courses
+    CourseTree* bst;
+    bst = new CourseTree();
+    Course course;
+
+    int choice = 0;
+    while (choice != 9) {
+        cout << "Menu:" << endl;
+        cout << "  1. Load Data Structure" << endl;
+        cout << "  2. Print Course List" << endl;
+        cout << "  3. Print Course" << endl;
+        cout << "  9. Exit" << endl;
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        switch (choice) {
+
+        case 1:
+            // Complete the method call to load the courses
+            loadCourses(csvPath, bst);
+            break;
+
+        case 2:
+            bst->InOrder();
+            break;
+
+        case 3:
+            cout << "Which course id do you want to search for?" << endl;
+            cin >> courseKey;
+
+            course = bst->Search(courseKey);
+
+
+            if (!course.courseId.empty()) {
+                displayCourse(course);
+            }
+            else {
+                cout << "Course Id " << courseKey << " not found." << endl;
+            }
+            break;
+
+            /*
+            case 4:
+                cout << "Which course id do you want to remove?" << endl;
+                cin >> courseKey;
+
+                bst->Remove(courseKey);
+                break;
+            */
+            default:
+                cout << choice << " is not a valid option." << endl;
+                
+        } 
+    }
+
+    cout << "Thank you for using the course planner!" << endl;
+
+    return 0;
+}
