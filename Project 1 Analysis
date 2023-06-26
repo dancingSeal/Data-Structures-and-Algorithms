@@ -1,0 +1,48 @@
+Project 1 – Course Vector, Hash Table, Tree Analysis 
+Stephanie Douglas
+The purpose of this document is to compare the advantages, disadvantages, and worst-case run times to create course objects (Big O value) for a vector, hash table, and tree. The Big O value for creating a course object for a vector and hash table are both O(n), while the tree data structure has a Big O value of O(log n). 
+Let’s first compare the vector and hash table. While they have the same worst-case runtime, they have their own advantages. Hash tables have keys that provide for quick searching. On the contrary, vectors are slower at searching, as a search through the entire vector is required until the match is found. If the program does not require searching, a vector data structure could be a better fit than a hash table. Vectors are used for storing data that can be incremented through, while hash tables have indexes that reference keys. 
+Now let’s add a comparison to the tree data structure, which has a logarithmic worst-case runtime. The tree has a faster runtime than the vector and hash table. However, it is important to note that trees must be organized in a specific way, as they run the risk of being linear. For example, if the lowest or the highest number is set to the root then each node would be on right or left, respectively. 
+Based on the runtime tables below and the analysis above, my recommendation would be to use a tree data structure. A tree data structure is the fastest of three structures analyzed and can efficiently search and sort.
+Vector
+Code	Line Cost	# Times Executes	Total Cost
+INITIALIZE prerequisite count to 1	1	1	1
+SET course id to phrase 1	1	1	1
+SET course title to phrase 2	1	1	1
+DO UNTIL end of phrase counter starting with phrase 3	1	n	n
+	SET prerequisite to phrase	1	1	1
+PROCESS push back course object to vector	1	1	1
+Total Cost	n + 5
+Runtime	O(n)
+
+Hash Table
+Code	Line Cost	# Times Executes	Total Cost
+CREATE the key for the given course	1	1	1
+INITIALIZE current node to nodes vector at key	1	1	1
+IF current node is pointing to null	1	n	n
+	INITIALIZE new node to node function with course and key	1	1	1
+ELSE IF node is not used (default constructor called)	1	n	n
+	SET key	1	1	1
+	SET course	1	1	1
+	SET next node to null pointer	1	1	1
+ELSE find the next open node	1	n	n
+	DO WHILE next node not equal to null pointer	1	n	n
+		SET current node to next node	1	1	1
+	PROCESS add new node to end by setting next node to new node struct with course, key	1	1	1
+Total Cost	4n + 8
+Runtime	O(n)
+
+Tree
+Code	Line Cost	# Times Executes	Total Cost
+DO WHILE current node is not null	1	n	n
+	DO WHILE all current node prerequisites have been looped	1	n	n
+		IF current node prerequisite course number equals course to add	1	n	n
+			PROCESS add course before current node	1	1	1
+	IF current node left is not null	1	n	n
+		SET current node to left	1	1	1
+		CALL add function recursively with current node left	1	n/2	n/2
+	ELSE current node right is not null	1	n	n
+		SET current node to right	1	1	1
+		CALL add function recursively with current node right	1	n/2	n/2
+Total Cost	2(n/2) + 5n + 3
+Runtime	O(log n)
